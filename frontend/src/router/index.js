@@ -6,6 +6,8 @@ import RegisterView from '../views/RegisterView.vue'
 import ProblemPracticeView from '../views/ProblemPracticeView.vue'
 import CommunityView from '../views/CommunityView.vue'
 import MessageCenterView from '../views/MessageCenterView.vue'
+import ProfileView from '../views/ProfileView.vue'
+import PostDetailView from '../views/PostDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -26,6 +28,18 @@ const router = createRouter({
       path: '/community',
       name: 'community',
       component: CommunityView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/community/:id',
+      name: 'postDetail',
+      component: PostDetailView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/me',
+      name: 'profile',
+      component: ProfileView,
       meta: { requiresAuth: true }
     },
     {
