@@ -4,6 +4,7 @@ import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import ProblemPracticeView from '../views/ProblemPracticeView.vue'
+import CommunityView from '../views/CommunityView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -18,6 +19,12 @@ const router = createRouter({
       path: '/problems',
       name: 'problems',
       component: ProblemPracticeView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/community',
+      name: 'community',
+      component: CommunityView,
       meta: { requiresAuth: true }
     },
     {
