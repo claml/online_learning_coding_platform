@@ -53,7 +53,12 @@ const handleLogin = () => {
       const { data } = await api.post('/auth/login', form.value)
       const token = data?.token || 'demo-token'
       userStore.setToken(token)
-      userStore.setUser(data?.user || { username: form.value.email })
+      userStore.setUser({
+        id: data?.userId,
+        username: data?.username || form.value.email,
+        role: data?.role,
+        bindingStatus: data?.bindingStatus
+      })
       ElMessage.success('登录成功')
       const redirect = route.query.redirect || { name: 'home' }
       router.push(redirect)
