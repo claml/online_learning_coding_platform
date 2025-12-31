@@ -116,36 +116,54 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import api from '../api/axios'
-import { useUserStore } from '../stores/user'
 import { useRouter } from 'vue-router'
+import {
+  bindIdentifier,
+  getCurrentUser,
+  updateCurrentUser,
+  updatePassword as updatePasswordApi,
+  type UserProfile
+} from '../api/user'
+import { getMyPosts, type PostSummary } from '../api/community'
+import { useUserStore } from '../stores/user'
+
+interface ProfileForm {
+  username: string
+  avatarUrl?: string
+}
+
+interface PasswordForm {
+  oldPassword: string
+  newPassword: string
+  confirmPassword: string
+}
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const profile = ref(null)
-const posts = ref([])
+const profile = ref<UserProfile | null>(null)
+const posts = ref<PostSummary[]>([])
 const loading = ref(true)
 const postsLoading = ref(false)
 const savingProfile = ref(false)
 const passwordLoading = ref(false)
 const bindingLoading = ref(false)
 
-const profileForm = reactive({
+const profileForm = reactive<ProfileForm>({
   username: '',
   avatarUrl: ''
 })
 
-const passwordForm = reactive({
+const passwordForm = reactive<PasswordForm>({
   oldPassword: '',
   newPassword: '',
   confirmPassword: ''
 })
 
-const bindingInput = ref('')
+const bindingInput = ref<string>('')
 
 const roleLabel = computed(() => {
   switch (profile.value?.role) {
@@ -165,7 +183,7 @@ const bindingLabel = computed(() => {
 
 const boundIdentifier = computed(() => {
   if (!profile.value) return ''
-  return profile.value.teacherId || profile.value.studentId || profile.value.identifier
+  return profile.value.teacherId || profile.value.studentId || profile.value.identifier || ''
 })
 
 const bindingStatusText = computed(() => {
@@ -181,13 +199,13 @@ const bindingTagType = computed(() => {
 
 const isPending = computed(() => profile.value?.bindingStatus === 'PENDING')
 
-const renderExcerpt = (content) => {
+const renderExcerpt = (content?: string) => {
   if (!content) return ''
   const plain = content.replace(/[#>*_`\-]/g, '').replace(/\n+/g, ' ')
   return plain.length > 80 ? `${plain.slice(0, 80)}...` : plain
 }
 
-const formatDate = (value) => {
+const formatDate = (value?: string | number | Date) => {
   if (!value) return ''
   return new Date(value).toLocaleString()
 }
@@ -208,15 +226,12 @@ const fetchData = async () => {
   loading.value = true
   postsLoading.value = true
   try {
-    const [profileRes, postsRes] = await Promise.all([
-      api.get('/users/me'),
-      api.get('/community/posts/me')
-    ])
+    const [profileRes, postsRes] = await Promise.all([getCurrentUser(), getMyPosts()])
     profile.value = profileRes.data
     userStore.setUser(profileRes.data)
     resetProfile()
     posts.value = postsRes.data || []
-  } catch (error) {
+  } catch (error: any) {
     ElMessage.error(error.response?.data?.message || '获取数据失败')
   } finally {
     loading.value = false
@@ -231,14 +246,14 @@ const saveProfile = async () => {
   }
   savingProfile.value = true
   try {
-    const { data } = await api.put('/users/me', {
+    const { data } = await updateCurrentUser({
       username: profileForm.username,
       avatarUrl: profileForm.avatarUrl
     })
     profile.value = data
     userStore.setUser(data)
     ElMessage.success('保存成功')
-  } catch (error) {
+  } catch (error: any) {
     ElMessage.error(error.response?.data?.message || '保存失败')
   } finally {
     savingProfile.value = false
@@ -252,21 +267,28 @@ const submitBinding = async () => {
   }
   bindingLoading.value = true
   try {
-    const payload = { identifier: bindingInput.value }
+    const payload: { identifier: string; studentId?: string; teacherId?: string } = {
+      identifier: bindingInput.value
+    }
     if (profile.value?.role === 'STUDENT') {
       payload.studentId = bindingInput.value
     }
     if (profile.value?.role === 'TEACHER') {
       payload.teacherId = bindingInput.value
     }
-    const { data } = await api.post('/users/me/bind', payload)
-    profile.value.bindingStatus = data.status
-    profile.value.boundStatus = data.status === 'APPROVED'
+    const { data } = await bindIdentifier(payload)
+    if (profile.value) {
+      profile.value.bindingStatus = data.status
+      profile.value.boundStatus = data.status === 'APPROVED'
+      profile.value.identifier = data.identifier ?? profile.value.identifier
+      profile.value.studentId = data.studentId ?? profile.value.studentId
+      profile.value.teacherId = data.teacherId ?? profile.value.teacherId
+    }
     if (data.identifier) {
       bindingInput.value = ''
     }
     ElMessage.success('绑定申请已提交')
-  } catch (error) {
+  } catch (error: any) {
     ElMessage.error(error.response?.data?.message || '提交失败')
   } finally {
     bindingLoading.value = false
@@ -284,20 +306,20 @@ const updatePassword = async () => {
   }
   passwordLoading.value = true
   try {
-    await api.put('/users/me/password', {
+    await updatePasswordApi({
       oldPassword: passwordForm.oldPassword,
       newPassword: passwordForm.newPassword
     })
     ElMessage.success('密码修改成功')
     resetPassword()
-  } catch (error) {
+  } catch (error: any) {
     ElMessage.error(error.response?.data?.message || '修改失败')
   } finally {
     passwordLoading.value = false
   }
 }
 
-const viewPost = (id) => {
+const viewPost = (id: number | string) => {
   router.push({ name: 'postDetail', params: { id } })
 }
 
