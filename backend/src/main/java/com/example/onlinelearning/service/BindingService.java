@@ -39,9 +39,17 @@ public class BindingService {
             throw new IllegalStateException("User is already bound");
         }
 
+        String identifier = resolveIdentifierByRole(user.getRole(), request);
+
+        if (user.getBindingStatus() == BindingStatus.REJECTED) {
+            user.setBindingIdentifier(null);
+            user.setStudentId(null);
+            user.setTeacherId(null);
+        }
+
         BindingRequest bindingRequest = new BindingRequest();
         bindingRequest.setUser(user);
-        bindingRequest.setIdentifier(request.getIdentifier());
+        bindingRequest.setIdentifier(identifier);
         bindingRequest.setStatus(BindingStatus.PENDING);
         bindingRequestRepository.save(bindingRequest);
 
@@ -72,6 +80,12 @@ public class BindingService {
         User user = bindingRequest.getUser();
         user.setBindingStatus(BindingStatus.BOUND);
         user.setBindingIdentifier(bindingRequest.getIdentifier());
+        if (user.getRole() == Role.STUDENT) {
+            user.setStudentId(bindingRequest.getIdentifier());
+        }
+        if (user.getRole() == Role.TEACHER) {
+            user.setTeacherId(bindingRequest.getIdentifier());
+        }
         user.setBindingUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
 
@@ -95,6 +109,8 @@ public class BindingService {
         User user = bindingRequest.getUser();
         user.setBindingStatus(BindingStatus.REJECTED);
         user.setBindingIdentifier(null);
+        user.setStudentId(null);
+        user.setTeacherId(null);
         userRepository.save(user);
 
         notificationService.createNotification(user, NotificationType.BINDING_REJECTED,
@@ -107,6 +123,26 @@ public class BindingService {
         if (bindingRequest.getStatus() != BindingStatus.PENDING) {
             throw new IllegalStateException("Binding request has already been reviewed");
         }
+    }
+
+    private String resolveIdentifierByRole(Role role, BindSubmitRequest request) {
+        String identifier;
+        if (role == Role.STUDENT) {
+            identifier = request.getStudentId();
+        } else if (role == Role.TEACHER) {
+            identifier = request.getTeacherId();
+        } else {
+            identifier = request.getIdentifier();
+        }
+
+        if (!org.springframework.util.StringUtils.hasText(identifier)) {
+            identifier = request.getIdentifier();
+        }
+
+        if (!org.springframework.util.StringUtils.hasText(identifier)) {
+            throw new IllegalArgumentException("Binding identifier is required");
+        }
+        return identifier;
     }
 
     private BindingRequestResponse toResponse(BindingRequest request) {

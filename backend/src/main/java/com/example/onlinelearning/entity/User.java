@@ -23,6 +23,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(length = 255)
+    private String avatarUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
@@ -33,6 +36,12 @@ public class User {
 
     @Column(length = 100)
     private String bindingIdentifier;
+
+    @Column(length = 100)
+    private String studentId;
+
+    @Column(length = 100)
+    private String teacherId;
 
     private LocalDateTime bindingUpdatedAt;
 
