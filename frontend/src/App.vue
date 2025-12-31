@@ -3,6 +3,8 @@
     <el-header class="app-header">
       <div class="logo">Online Learning Platform</div>
       <div class="nav-actions">
+        <el-button v-if="isAuthenticated" type="primary" link @click="toHome">课程列表</el-button>
+        <el-button v-if="isAuthenticated" type="primary" link @click="toProblems">编程题目</el-button>
         <el-button v-if="!isAuthenticated" type="primary" link @click="toLogin">登录</el-button>
         <el-button v-if="!isAuthenticated" type="primary" link @click="toRegister">注册</el-button>
         <template v-else>
@@ -29,6 +31,8 @@ const isAuthenticated = computed(() => userStore.isAuthenticated)
 
 const toLogin = () => router.push({ name: 'login' })
 const toRegister = () => router.push({ name: 'register' })
+const toHome = () => router.push({ name: 'home' })
+const toProblems = () => router.push({ name: 'problems' })
 const logout = () => {
   userStore.logout()
   router.push({ name: 'login' })

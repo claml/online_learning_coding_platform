@@ -3,6 +3,7 @@ import { useUserStore } from '../stores/user'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import ProblemPracticeView from '../views/ProblemPracticeView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -11,6 +12,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/problems',
+      name: 'problems',
+      component: ProblemPracticeView,
       meta: { requiresAuth: true }
     },
     {
