@@ -6,8 +6,11 @@
         <el-form-item label="用户名" prop="username">
           <el-input v-model="form.username" />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="form.email" placeholder="example@mail.com" />
+        <el-form-item label="身份" prop="role">
+          <el-radio-group v-model="form.role">
+            <el-radio-button label="STUDENT">学生</el-radio-button>
+            <el-radio-button label="TEACHER">教师</el-radio-button>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label="密码" prop="password">
           <el-input v-model="form.password" type="password" show-password />
@@ -34,16 +37,13 @@ const loading = ref(false)
 
 const form = ref({
   username: '',
-  email: '',
-  password: ''
+  password: '',
+  role: 'STUDENT'
 })
 
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '邮箱格式不正确', trigger: ['blur', 'change'] }
-  ],
+  role: [{ required: true, message: '请选择身份', trigger: 'change' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 }
 
