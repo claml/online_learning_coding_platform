@@ -1,6 +1,7 @@
 package com.example.onlinelearning.service;
 
 import com.example.onlinelearning.dto.*;
+import com.example.onlinelearning.entity.NotificationType;
 import com.example.onlinelearning.entity.Post;
 import com.example.onlinelearning.entity.PostComment;
 import com.example.onlinelearning.entity.PostLike;
@@ -22,15 +23,18 @@ public class CommunityService {
     private final PostLikeRepository postLikeRepository;
     private final PostCommentRepository postCommentRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public CommunityService(PostRepository postRepository,
                             PostLikeRepository postLikeRepository,
                             PostCommentRepository postCommentRepository,
-                            UserRepository userRepository) {
+                            UserRepository userRepository,
+                            NotificationService notificationService) {
         this.postRepository = postRepository;
         this.postLikeRepository = postLikeRepository;
         this.postCommentRepository = postCommentRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -119,6 +123,8 @@ public class CommunityService {
         Post post = findPostOrThrow(postId);
         post.setDeleted(true);
         post.setDeletedReason(request.getReason());
+        notificationService.createNotification(post.getAuthor(), NotificationType.POST_DELETED,
+                String.format("您的帖子《%s》已被删除：%s", post.getTitle(), request.getReason()));
         return toResponse(post, admin, false, Collections.emptyList());
     }
 

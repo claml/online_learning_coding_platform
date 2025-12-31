@@ -1,6 +1,7 @@
 package com.example.onlinelearning.service;
 
 import com.example.onlinelearning.dto.*;
+import com.example.onlinelearning.entity.NotificationType;
 import com.example.onlinelearning.entity.*;
 import jakarta.transaction.Transactional;
 import org.springframework.security.access.AccessDeniedException;
@@ -16,10 +17,12 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    public CourseService(CourseRepository courseRepository, UserRepository userRepository) {
+    public CourseService(CourseRepository courseRepository, UserRepository userRepository, NotificationService notificationService) {
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -58,7 +61,7 @@ public class CourseService {
     }
 
     @Transactional
-    public CourseResponse reviewCourse(Long courseId, CourseStatus status, String username) {
+    public CourseResponse reviewCourse(Long courseId, CourseStatus status, String username, String reason) {
         Assert.notNull(status, "status is required");
         User admin = findUserOrThrow(username);
         if (admin.getRole() != Role.ADMIN) {
@@ -69,7 +72,13 @@ public class CourseService {
         }
         Course course = findCourseOrThrow(courseId);
         course.setStatus(status);
-        return toResponse(course);
+        if (status == CourseStatus.OFFLINE) {
+            String message = reason != null && !reason.isBlank()
+                    ? String.format("您的课程《%s》审核未通过：%s", course.getTitle(), reason)
+                    : String.format("您的课程《%s》审核未通过，请根据反馈重新完善。", course.getTitle());
+            notificationService.createNotification(course.getTeacher(), NotificationType.COURSE_REJECTED, message);
+        }
+        return toResponse(courseRepository.save(course));
     }
 
     @Transactional
