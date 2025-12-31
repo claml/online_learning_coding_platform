@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: online-learning-platform
+  datasource:
+    url: jdbc:mysql://localhost:3306/online_learning_platform?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+server:
+  port: 8080
+
+security:
+  jwt:
+    # Use a Base64 encoded secret key (at least 256 bits when decoded)
+    secret: VGhpcy1pcy1hLXNlY3JldC1rZXktZm9yLW9ubGluZS1sZWFybmluZy1wbGF0Zm9ybQ==
+    expiration-ms: 86400000
+
+logging:
+  level:
+    org.springframework.security: INFO
