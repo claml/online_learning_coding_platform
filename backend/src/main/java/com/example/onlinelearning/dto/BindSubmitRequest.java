@@ -1,10 +1,21 @@
 package com.example.onlinelearning.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class BindSubmitRequest {
-    @NotBlank
+    /**
+     * Legacy binding identifier, kept for compatibility.
+     */
     private String identifier;
+
+    /**
+     * Student ID for STUDENT role.
+     */
+    private String studentId;
+
+    /**
+     * Teacher ID for TEACHER role.
+     */
+    private String teacherId;
 }

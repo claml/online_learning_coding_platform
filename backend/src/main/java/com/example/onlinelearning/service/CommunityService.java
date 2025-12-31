@@ -63,6 +63,14 @@ public class CommunityService {
                 .toList();
     }
 
+    public List<PostResponse> listMyPosts(String username) {
+        User currentUser = findUserOrThrow(username);
+        List<Post> posts = postRepository.findByAuthorUsernameAndDeletedFalseOrderByCreatedAtDesc(username);
+        return posts.stream()
+                .map(post -> toResponse(post, currentUser, isLikedByCurrentUser(post, currentUser), Collections.emptyList()))
+                .toList();
+    }
+
     public PostResponse getPost(Long id, String username) {
         Post post = findActivePostOrThrow(id);
         User currentUser = username == null ? null : findUserOrThrow(username);

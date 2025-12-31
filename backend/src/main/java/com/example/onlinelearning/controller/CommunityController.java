@@ -39,6 +39,11 @@ public class CommunityController {
         return ResponseEntity.ok(communityService.getPost(id, username));
     }
 
+    @GetMapping("/posts/me")
+    public ResponseEntity<List<PostResponse>> myPosts(Authentication authentication) {
+        return ResponseEntity.ok(communityService.listMyPosts(authentication.getName()));
+    }
+
     @PostMapping("/posts/{id}/like")
     public ResponseEntity<PostResponse> likePost(@PathVariable Long id, Authentication authentication) {
         return ResponseEntity.ok(communityService.likePost(id, authentication.getName()));
