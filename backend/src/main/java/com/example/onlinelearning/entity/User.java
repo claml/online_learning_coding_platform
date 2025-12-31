@@ -27,6 +27,15 @@ public class User {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private BindingStatus bindingStatus;
+
+    @Column(length = 100)
+    private String bindingIdentifier;
+
+    private LocalDateTime bindingUpdatedAt;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -34,6 +43,9 @@ public class User {
     public void prePersist() {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
+        }
+        if (bindingStatus == null) {
+            bindingStatus = role == Role.ADMIN ? BindingStatus.BOUND : BindingStatus.UNBOUND;
         }
     }
 }
