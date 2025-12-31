@@ -20,6 +20,7 @@
         <el-button v-if="!isAuthenticated" type="primary" link @click="toRegister">注册</el-button>
         <template v-else>
           <span class="welcome">欢迎，{{ userStore.user?.username || '用户' }}</span>
+          <el-button type="primary" link @click="toProfile">我的</el-button>
           <el-button type="primary" link @click="logout">退出</el-button>
         </template>
       </div>
@@ -49,6 +50,7 @@ const toRegister = () => router.push({ name: 'register' })
 const toHome = () => router.push({ name: 'home' })
 const toProblems = () => router.push({ name: 'problems' })
 const toCommunity = () => router.push({ name: 'community' })
+const toProfile = () => router.push({ name: 'profile' })
 const toMessages = () => router.push({ name: 'messages' })
 const logout = () => {
   userStore.logout()
