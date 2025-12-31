@@ -1,11 +1,15 @@
 <template>
   <el-container class="app-container">
     <el-header class="app-header">
-      <div class="logo">Online Learning Platform</div>
+      <div class="header-left">
+        <div class="logo">Online Learning Platform</div>
+        <div class="primary-nav" v-if="isAuthenticated">
+          <el-button type="primary" link @click="toHome">课程列表</el-button>
+          <el-button type="primary" link @click="toProblems">编程题目</el-button>
+          <el-button type="primary" link @click="toCommunity">社区</el-button>
+        </div>
+      </div>
       <div class="nav-actions">
-        <el-button v-if="isAuthenticated" type="primary" link @click="toHome">课程列表</el-button>
-        <el-button v-if="isAuthenticated" type="primary" link @click="toProblems">编程题目</el-button>
-        <el-button v-if="isAuthenticated" type="primary" link @click="toCommunity">社区</el-button>
         <el-badge v-if="isAuthenticated" :value="unreadCount" :hidden="!unreadCount" class="message-entry">
           <el-button type="primary" link @click="toMessages">
             <el-icon><Bell /></el-icon>
@@ -87,9 +91,21 @@ onMounted(() => {
   background-color: #fff;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .logo {
   font-size: 18px;
   font-weight: 600;
+}
+
+.primary-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .nav-actions {
