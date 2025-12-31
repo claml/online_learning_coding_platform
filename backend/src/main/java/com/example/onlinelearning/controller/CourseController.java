@@ -46,7 +46,7 @@ public class CourseController {
     public ResponseEntity<CourseResponse> reviewCourse(@PathVariable Long id,
                                                        @Valid @RequestBody CourseStatusUpdateRequest request,
                                                        Authentication authentication) {
-        CourseResponse response = courseService.reviewCourse(id, request.getStatus(), authentication.getName());
+        CourseResponse response = courseService.reviewCourse(id, request.getStatus(), authentication.getName(), request.getReason());
         return ResponseEntity.ok(response);
     }
 

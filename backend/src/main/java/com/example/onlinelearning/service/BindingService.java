@@ -17,10 +17,12 @@ public class BindingService {
 
     private final UserRepository userRepository;
     private final BindingRequestRepository bindingRequestRepository;
+    private final NotificationService notificationService;
 
-    public BindingService(UserRepository userRepository, BindingRequestRepository bindingRequestRepository) {
+    public BindingService(UserRepository userRepository, BindingRequestRepository bindingRequestRepository, NotificationService notificationService) {
         this.userRepository = userRepository;
         this.bindingRequestRepository = bindingRequestRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -94,6 +96,9 @@ public class BindingService {
         user.setBindingStatus(BindingStatus.REJECTED);
         user.setBindingIdentifier(null);
         userRepository.save(user);
+
+        notificationService.createNotification(user, NotificationType.BINDING_REJECTED,
+                String.format("绑定申请被驳回：%s", reviewRequest.getReason()));
 
         return toResponse(bindingRequestRepository.save(bindingRequest));
     }

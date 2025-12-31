@@ -6,6 +6,12 @@
         <el-button v-if="isAuthenticated" type="primary" link @click="toHome">课程列表</el-button>
         <el-button v-if="isAuthenticated" type="primary" link @click="toProblems">编程题目</el-button>
         <el-button v-if="isAuthenticated" type="primary" link @click="toCommunity">社区</el-button>
+        <el-badge v-if="isAuthenticated" :value="unreadCount" :hidden="!unreadCount" class="message-entry">
+          <el-button type="primary" link @click="toMessages">
+            <el-icon><Bell /></el-icon>
+            消息
+          </el-button>
+        </el-badge>
         <el-button v-if="!isAuthenticated" type="primary" link @click="toLogin">登录</el-button>
         <el-button v-if="!isAuthenticated" type="primary" link @click="toRegister">注册</el-button>
         <template v-else>
@@ -22,23 +28,47 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
+import { computed, watch, onMounted } from 'vue'
+import { Bell } from '@element-plus/icons-vue'
 import { useUserStore } from './stores/user'
+import { useNotificationStore } from './stores/notifications'
 
 const router = useRouter()
 const userStore = useUserStore()
+const notificationStore = useNotificationStore()
 
 const isAuthenticated = computed(() => userStore.isAuthenticated)
+const unreadCount = computed(() => notificationStore.unreadCount)
 
 const toLogin = () => router.push({ name: 'login' })
 const toRegister = () => router.push({ name: 'register' })
 const toHome = () => router.push({ name: 'home' })
 const toProblems = () => router.push({ name: 'problems' })
 const toCommunity = () => router.push({ name: 'community' })
+const toMessages = () => router.push({ name: 'messages' })
 const logout = () => {
   userStore.logout()
+  notificationStore.reset()
   router.push({ name: 'login' })
 }
+
+const loadUnread = () => {
+  if (isAuthenticated.value) {
+    notificationStore.fetchUnreadCount()
+  }
+}
+
+watch(isAuthenticated, (authed) => {
+  if (authed) {
+    loadUnread()
+  } else {
+    notificationStore.reset()
+  }
+})
+
+onMounted(() => {
+  loadUnread()
+})
 </script>
 
 <style scoped>
@@ -66,6 +96,10 @@ const logout = () => {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.message-entry :deep(.el-badge__content.is-fixed) {
+  right: 2px;
 }
 
 .welcome {
