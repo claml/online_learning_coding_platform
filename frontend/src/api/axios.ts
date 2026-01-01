@@ -1,15 +1,17 @@
-import axios from 'axios'
+import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios'
 import router from '../router'
 import { useUserStore } from '../stores/user'
 
-const api = axios.create({
-  baseURL: 'http://localhost:8080'
+const api: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  withCredentials: true
 })
 
 api.interceptors.request.use(
-  (config) => {
+  (config: AxiosRequestConfig) => {
     const userStore = useUserStore()
     if (userStore.token) {
+      config.headers = config.headers ?? {}
       config.headers.Authorization = `Bearer ${userStore.token}`
     }
     return config
